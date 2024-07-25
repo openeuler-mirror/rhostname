@@ -1,2 +1,0 @@
-1. hostname -a -f 和 hostname -f -a 的结果取决于 -f 和 -a 的先后顺序，要不要还原
-2. rust 的错误类型和 linux 的错误类型不一样，参考 https://doc.rust-lang.org/std/io/enum.ErrorKind.html 和 https://internals.rust-lang.org/t/insufficient-std-io-error/3597
