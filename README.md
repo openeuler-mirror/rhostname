@@ -25,6 +25,11 @@ sudo: unable to resolve host a: Temporary failure in name resolution
 
 错误原因参考 https://askubuntu.com/questions/1343609/sudo-unable-to-resolve-host-hostname-temporary-failure-in-name-resolution 和 https://blog.csdn.net/ichuzhen/article/details/8241847
 
+
+## hostname -b 和 hostname -F ./empty_file 行为不一致
+
+hostname -b 不接参数会输出 hostname，hostname -F ./empty_file 会报错。
+
 # sethostname
 
 ## 错误类型
@@ -43,3 +48,9 @@ rust 的错误类型和 linux 的错误类型不一样，参考 https://doc.rust
 > POSIX.1 guarantees that "Host names (not includ‐ing the terminating null byte) are limited to HOST_NAME_MAX bytes"
 
 2. 不预处理，直接将参数传入 sethostname，读取返回值，EINVAL 会告诉我们长度是否超出
+
+# getdomainname
+
+## domainname 的最大长度
+
+有的说 64，有的说 255
