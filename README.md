@@ -49,6 +49,12 @@ rust 的错误类型和 linux 的错误类型不一样，参考 https://doc.rust
 
 2. 不预处理，直接将参数传入 sethostname，读取返回值，EINVAL 会告诉我们长度是否超出
 
+# gethostbyname
+
+这个是关于 -a 需要的函数，在 C 语言的 #include <netdb.h> 文件中。
+
+使用方法一是用 [rpgffi](https://docs.rs/rpgffi/latest/i686-apple-darwin/rpgffi/fn.gethostbyname.html)，二是[编译 C 语言使用](https://docs.rust-embedded.org/book/interoperability/c-with-rust.html)
+
 # getdomainname
 
 ## domainname 的最大长度

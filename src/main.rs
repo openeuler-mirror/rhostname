@@ -1,6 +1,8 @@
 use clap::Parser;
-use std::{fs, process};
-use uthostname::{gethostname,sethostname};
+use std::{fs, net::IpAddr, net::SocketAddr, process};
+use uthostname::{gethostname,getdomainname,sethostname};
+use dns_lookup::getnameinfo;
+use local_ip_address::list_afinet_netifas;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -101,24 +103,66 @@ fn run(args: Args) -> Result<(), &'static str> {
     sethostname(hostname)
   } else if args.alias {
     Ok(())
-  } else if args.all_fqdns {
-    Ok(())
-  } else if args.domain {
-    Ok(())
-  } else if args.fqdn {
-    Ok(())
-  } else if args.ip_address {
-    Ok(())
-  } else if args.all_ip_address {
+  } else if args.all_fqdns || args.all_ip_address {
+    let network_interfaces = list_afinet_netifas();
+
+    if let Ok(network_interfaces) = network_interfaces {
+      for (_, ip) in network_interfaces.iter() {
+        if !ip.is_ipv4() && !ip.is_ipv6()
+          || ip.is_loopback()
+          || ip.to_string().is_empty()
+        {
+          continue;
+        }
+
+        if let IpAddr::V6(ipv6) = ip {
+          // About link local 
+          // https://support.huawei.com/enterprise/zh/doc/EDOC1100116138
+          // To avoid using rust nightly, source code is copied here
+          // https://doc.rust-lang.org/std/net/struct.Ipv6Addr.html#method.is_unicast_link_local
+          // https://doc.rust-lang.org/1.80.0/src/core/net/ip_addr.rs.html#1626
+          if (ipv6.segments()[0] & 0xffc0) == 0xfe80 {
+            continue;
+          }
+        }
+
+        let flags = if args.all_fqdns {0} else {1};
+
+        let socket = SocketAddr::new(*ip, 0);
+        match getnameinfo(&socket, flags) {
+          Ok((longname, _)) => print!("{} ", longname),
+          Err(_) => return Err("Failed to lookup socket"),
+        }
+      }
+
+      Ok(())
+    } else {
+      Err("Error getting network interfaces")
+    }
+  } else if args.domain || args.fqdn || args.ip_address {
     Ok(())
   } else if args.short {
-    Ok(())
+    let hostname = gethostname()?;
+    let hostname =
+      hostname
+      .split('.')
+      .collect::<Vec<&str>>();
+
+    match hostname.get(0) {
+      Some(hostname) => {
+        println!("{hostname}");
+        Ok(())
+      },
+      None => Err("hostname -short error")
+    }
   } else if args.nis {
+    let domainname = getdomainname()?;
+    println!("{domainname}");
+
     Ok(())
   }
   else {
     let hostname = gethostname()?;
-    
     println!("{hostname}");
     Ok(())
   }
