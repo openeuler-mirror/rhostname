@@ -1,7 +1,7 @@
 use clap::Parser;
 use std::{fs, net::IpAddr, net::SocketAddr, process};
 use uthostname::{gethostname,getdomainname,sethostname};
-use dns_lookup::getnameinfo;
+use dns_lookup::{getnameinfo, AddrInfoHints, getaddrinfo};
 use local_ip_address::list_afinet_netifas;
 
 #[derive(Parser, Debug)]
@@ -140,6 +140,43 @@ fn run(args: Args) -> Result<(), &'static str> {
       Err("Error getting network interfaces")
     }
   } else if args.domain || args.fqdn || args.ip_address {
+    const SOCK_DGRAM: i32 = 2;
+    const AI_CANONNAME: i32 = 0x0002;
+    let hints = AddrInfoHints {
+      socktype: SOCK_DGRAM,
+      flags: AI_CANONNAME,
+      ..AddrInfoHints::default()
+    };
+
+    let hostname = gethostname()?;
+    let sockets = match getaddrinfo(Some(&hostname), None, Some(hints)) {
+      Ok(sockets) => sockets.collect::<std::io::Result<Vec<_>>>().unwrap(),  
+      Err(_) => return Err("err")
+    };
+
+    let mut ip_address: Vec<String> = Vec::new();
+    let mut p = String::new();
+
+    for socket in sockets {
+      ip_address.push(socket.sockaddr.ip().to_string());
+      if socket.canonname.is_some() {
+        p = socket.canonname.unwrap();
+      }
+    }
+
+    if args.domain {
+      if let Some((_, p)) = p.split_once('.') {
+        println!("{p}");
+      }
+    } else if args.fqdn {
+      println!("{p}");
+    } else if args.ip_address {
+      for ip in ip_address {
+        println!("{ip} ");
+      }
+      println!();
+    }
+
     Ok(())
   } else if args.short {
     let hostname = gethostname()?;
