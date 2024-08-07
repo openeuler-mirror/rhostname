@@ -2,7 +2,6 @@ use clap::Parser;
 use std::{fs, net::Ipv6Addr, process, ptr, mem};
 use uthostname::{gethostname, getdomainname, sethostname, getnameinfo};
 use dns_lookup::{AddrInfoHints, getaddrinfo};
-// use local_ip_address::list_afinet_netifas;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
