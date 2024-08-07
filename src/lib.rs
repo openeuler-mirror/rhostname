@@ -66,3 +66,21 @@ pub fn sethostname(name: String) -> Result<(), &'static str> {
     Ok(())
   }
 }
+
+pub fn getnameinfo(sa: *const libc::sockaddr, salen: libc::socklen_t, flags: libc::c_int) -> Result<String, &'static str> {
+  let mut host = vec![0u8; libc::NI_MAXHOST as usize];
+
+  let ret = unsafe { libc::getnameinfo(sa, salen, host.as_mut_ptr() as *mut libc::c_char, host.len() as u32, std::ptr::null_mut(), 0, flags) };
+  if ret != 0 {
+    Err("")
+  }
+  else {
+    match host.iter().position(|&x| x == 0) {
+      Some(end) => {
+        host.resize(end, 0);
+        Ok(CString::new(host).unwrap().to_str().unwrap().to_string())
+      },
+      None => Err(""),
+    }
+  }
+}

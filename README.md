@@ -60,3 +60,9 @@ rust 的错误类型和 linux 的错误类型不一样，参考 https://doc.rust
 ## domainname 的最大长度
 
 有的说 64，有的说 255
+
+# nix
+
+https://www.reddit.com/r/rust/comments/1bou5wz/windows_build_issue_could_not_find_sys_in_nix/
+
+我是用的是 WSL 作为开发环境，import nix 后 unresolved import `nix::ifaddr`。那么是不是编译出来的东西在有的平台上是不能用的。

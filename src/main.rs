@@ -1,8 +1,8 @@
 use clap::Parser;
-use std::{fs, net::IpAddr, net::SocketAddr, process};
-use uthostname::{gethostname,getdomainname,sethostname};
-use dns_lookup::{getnameinfo, AddrInfoHints, getaddrinfo};
-use local_ip_address::list_afinet_netifas;
+use std::{fs, net::Ipv6Addr, process, ptr, mem};
+use uthostname::{gethostname, getdomainname, sethostname, getnameinfo};
+use dns_lookup::{AddrInfoHints, getaddrinfo};
+// use local_ip_address::list_afinet_netifas;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -104,41 +104,59 @@ fn run(args: Args) -> Result<(), &'static str> {
   } else if args.alias {
     Ok(())
   } else if args.all_fqdns || args.all_ip_address {
-    let network_interfaces = list_afinet_netifas();
+    unsafe {
+      use libc::{NI_NUMERICHOST, NI_NAMEREQD, IFF_LOOPBACK, AF_INET, AF_INET6};
 
-    if let Ok(network_interfaces) = network_interfaces {
-      for (_, ip) in network_interfaces.iter() {
-        if !ip.is_ipv4() && !ip.is_ipv6()
-          || ip.is_loopback()
-          || ip.to_string().is_empty()
-        {
+      let mut ifap = ptr::null_mut();
+      let mut ifa = ptr::null_mut();
+      let flags = if args.all_ip_address { NI_NUMERICHOST } else { NI_NAMEREQD };
+
+      if libc::getifaddrs(&mut ifap) != 0 {
+        return Err("");
+      }
+      
+      loop {
+        ifa = if ifa == ptr::null_mut() { ifap } else { (*ifa).ifa_next };
+
+        if ifa.is_null() {
+          break;
+        }
+        if (*ifa).ifa_addr.is_null() {
+          continue;
+        }
+        if (*ifa).ifa_flags & IFF_LOOPBACK as u32 != 0 {
+          continue;
+        }
+        if (*ifa).ifa_flags & libc::IFF_UP as u32 == 0 {
           continue;
         }
 
-        if let IpAddr::V6(ipv6) = ip {
-          // About link local 
-          // https://support.huawei.com/enterprise/zh/doc/EDOC1100116138
-          // To avoid using rust nightly, source code is copied here
-          // https://doc.rust-lang.org/std/net/struct.Ipv6Addr.html#method.is_unicast_link_local
-          // https://doc.rust-lang.org/1.80.0/src/core/net/ip_addr.rs.html#1626
+        let family = (*(*ifa).ifa_addr).sa_family;
+        if family != AF_INET as u16 && family != AF_INET6 as u16 {
+          continue;
+        }
+
+				let addrlen = if family == AF_INET as u16 { mem::size_of::<libc::sockaddr_in>() } else { mem::size_of::<libc::sockaddr_in6>() };
+
+        if family == AF_INET6 as u16 {
+          let sa_in6 = (*ifa).ifa_addr as *const libc::sockaddr_in6;
+          let ipv6 = Ipv6Addr::from((*sa_in6).sin6_addr.s6_addr);
+
           if (ipv6.segments()[0] & 0xffc0) == 0xfe80 {
             continue;
           }
         }
 
-        let flags = if args.all_fqdns {0} else {1};
-
-        let socket = SocketAddr::new(*ip, 0);
-        match getnameinfo(&socket, flags) {
-          Ok((longname, _)) => print!("{} ", longname),
-          Err(_) => return Err("Failed to lookup socket"),
+        match getnameinfo((*ifa).ifa_addr, addrlen as u32, flags) {
+          Ok(name) => print!("{name} "),
+          Err(e) => return Err(e)
         }
       }
 
-      Ok(())
-    } else {
-      Err("Error getting network interfaces")
+      println!();
+      libc::freeifaddrs(ifap);
     }
+    Ok(())
   } else if args.domain || args.fqdn || args.ip_address {
     const SOCK_DGRAM: i32 = 2;
     const AI_CANONNAME: i32 = 0x0002;
@@ -172,7 +190,7 @@ fn run(args: Args) -> Result<(), &'static str> {
       println!("{p}");
     } else if args.ip_address {
       for ip in ip_address {
-        println!("{ip} ");
+        print!("{ip} ");
       }
       println!();
     }
