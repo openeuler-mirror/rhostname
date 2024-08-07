@@ -83,8 +83,11 @@ struct Args {
 
 fn run(args: Args) -> Result<(), &'static str> {
   if let Some(hostname) = args.boot {
+
     sethostname(hostname)
+
   } else if let Some(path) = args.file {
+
     let contents =
       fs::read_to_string(path)
       .expect("File not exist.");
@@ -98,11 +101,17 @@ fn run(args: Args) -> Result<(), &'static str> {
     }
 
     sethostname(hostname.to_string())
+
   } else if let Some(hostname) = args.hostname {
+
     sethostname(hostname)
+
   } else if args.alias {
+
     Ok(())
+
   } else if args.all_fqdns || args.all_ip_address {
+
     unsafe {
       use libc::{NI_NUMERICHOST, NI_NAMEREQD, IFF_LOOPBACK, AF_INET, AF_INET6};
 
@@ -155,8 +164,11 @@ fn run(args: Args) -> Result<(), &'static str> {
       println!();
       libc::freeifaddrs(ifap);
     }
+
     Ok(())
+
   } else if args.domain || args.fqdn || args.ip_address {
+
     const SOCK_DGRAM: i32 = 2;
     const AI_CANONNAME: i32 = 0x0002;
     let hints = AddrInfoHints {
@@ -195,7 +207,9 @@ fn run(args: Args) -> Result<(), &'static str> {
     }
 
     Ok(())
+
   } else if args.short {
+
     let hostname = gethostname()?;
     let hostname =
       hostname
@@ -209,16 +223,22 @@ fn run(args: Args) -> Result<(), &'static str> {
       },
       None => Err("hostname -short error")
     }
+
   } else if args.nis {
+
     let domainname = getdomainname()?;
     println!("{domainname}");
 
     Ok(())
+
   }
   else {
+
     let hostname = gethostname()?;
     println!("{hostname}");
+
     Ok(())
+
   }
 }
 

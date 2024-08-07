@@ -20,11 +20,14 @@ pub fn gethostname() -> Result<String, &'static str> {
   let ret = unsafe { libc::gethostname(buf.as_mut_ptr() as *mut libc::c_char, buf.len()) };
 
   if ret != 0 {
-    // EFAULT name is an invalid address.
-    // ENAMETOOLONG (glibc gethostname()) len is smaller than the actual size. (Before version 2.1, glibc uses EINVAL for this case.)
+    //: TODO
     Err("Something went wrong.")
   }
   else {
+    // > FROM `man gethostname`
+    // If the null-terminated hostname is too large to fit, then the name is truncated, and no error is returned
+    // (but see NOTES below).  POSIX.1 says that if such truncation occurs, then it is unspecified whether the
+    // returned buffer includes a terminating null byte.
     match u8_to_string(buf) {
       Some(name) => Ok(name),
       None => Err("Hostname is too large to fit."),
@@ -40,9 +43,13 @@ pub fn getdomainname() -> Result<String, &'static str> {
   let ret = unsafe { libc::getdomainname(buf.as_mut_ptr() as *mut libc::c_char, buf.len()) };
 
   if ret != 0 {
+    //: TODO
     Err("Something went wrong.")
   }
   else {
+    // getdomainname() returns the null-terminated domain name in the character array name, which has a length of len
+    // bytes.  If the null-terminated domain name requires more than len bytes, getdomainname() returns the first len
+    // bytes (glibc) or gives an error (libc).
     match u8_to_string(buf) {
       Some(name) => Ok(name),
       None => Err("Domain name is too large to fit."),
@@ -56,6 +63,7 @@ pub fn sethostname(name: String) -> Result<(), &'static str> {
   let result = unsafe { libc::sethostname(name.as_ptr(), len)};
 
   if result != 0 {
+    //: TODO
     // println!("{:?}", Error::last_os_error().kind());
 
     // match Error::last_os_error().kind() {
@@ -76,6 +84,7 @@ pub fn getnameinfo(sa: *const libc::sockaddr, salen: libc::socklen_t, flags: lib
   let ret = unsafe { libc::getnameinfo(sa, salen, host.as_mut_ptr() as *mut libc::c_char, host.len() as u32, std::ptr::null_mut(), 0, flags) };
 
   if ret != 0 {
+    //: TODO
     Err("")
   }
   else {
