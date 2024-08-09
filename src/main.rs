@@ -90,7 +90,7 @@ fn run(args: Args) -> Result<(), &'static str> {
 
     let contents =
       fs::read_to_string(path)
-      .expect("File not exist.");
+      .expect("No such file or directory.");
     let mut hostname = "";
 
     for line in contents.lines() {
@@ -108,6 +108,7 @@ fn run(args: Args) -> Result<(), &'static str> {
 
   } else if args.alias {
 
+    //: TODO
     Ok(())
 
   } else if args.all_fqdns || args.all_ip_address {
@@ -120,7 +121,7 @@ fn run(args: Args) -> Result<(), &'static str> {
       let flags = if args.all_ip_address { NI_NUMERICHOST } else { NI_NAMEREQD };
 
       if libc::getifaddrs(&mut ifap) != 0 {
-        return Err("");
+        return Err("Unkown error.");
       }
       
       loop {
@@ -180,7 +181,7 @@ fn run(args: Args) -> Result<(), &'static str> {
     let hostname = gethostname()?;
     let sockets = match getaddrinfo(Some(&hostname), None, Some(hints)) {
       Ok(sockets) => sockets.collect::<std::io::Result<Vec<_>>>().unwrap(),  
-      Err(_) => return Err("err")
+      Err(_) => return Err("Unknown error.")
     };
 
     let mut ip_address: Vec<String> = Vec::new();
@@ -221,7 +222,10 @@ fn run(args: Args) -> Result<(), &'static str> {
         println!("{hostname}");
         Ok(())
       },
-      None => Err("hostname -short error")
+      None => {
+        println!("");
+        Ok(())
+      }
     }
 
   } else if args.nis {
@@ -246,7 +250,7 @@ fn main() {
   let args = Args::parse();
 
   run(args).unwrap_or_else(|err| {
-    eprintln!("{err}");
+    eprintln!("hostname: {err}");
     process::exit(1);
   })
 }

@@ -1,3 +1,4 @@
+use std::io::Error;
 use std::ffi::CString;
 
 fn u8_to_string(mut v: Vec<u8>) -> Option<String> {
@@ -20,8 +21,7 @@ pub fn gethostname() -> Result<String, &'static str> {
   let ret = unsafe { libc::gethostname(buf.as_mut_ptr() as *mut libc::c_char, buf.len()) };
 
   if ret != 0 {
-    //: TODO
-    Err("Something went wrong.")
+    Err("Unknown error.")
   }
   else {
     // > FROM `man gethostname`
@@ -43,8 +43,7 @@ pub fn getdomainname() -> Result<String, &'static str> {
   let ret = unsafe { libc::getdomainname(buf.as_mut_ptr() as *mut libc::c_char, buf.len()) };
 
   if ret != 0 {
-    //: TODO
-    Err("Something went wrong.")
+    Err("Unknown error.")
   }
   else {
     // getdomainname() returns the null-terminated domain name in the character array name, which has a length of len
@@ -57,22 +56,57 @@ pub fn getdomainname() -> Result<String, &'static str> {
   }
 }
 
+fn check_hostname(name: String) -> bool {
+  let name = name.as_bytes();
+
+  if name.len() == 0 || !name[0].is_ascii_alphanumeric() || !name[name.len() - 1].is_ascii_alphanumeric() {
+    return false;
+  }
+
+  for i in 1..(name.len() - 1) {
+    if !name[i].is_ascii_alphanumeric() && name[i] != b'-' && name[i] != b'.' {
+      return false;
+    }
+    if name[i] == b'-' && (name[i - 1] == b'.' || name[i + 1] == b'.') {
+      return false;
+    }
+    if name[i] == b'.' && name[i - 1] == b'.' {
+      return false;
+    }
+  }
+
+  true
+}
+
 pub fn sethostname(name: String) -> Result<(), &'static str> {
+  if check_hostname(name.clone()) == false {
+    return Err("the specified hostname is invalid")
+  }
+  
   let len = name.len();
   let name = CString::new(name).unwrap();
-  let result = unsafe { libc::sethostname(name.as_ptr(), len)};
+  let ret = unsafe { libc::sethostname(name.as_ptr(), len)};
 
-  if result != 0 {
-    //: TODO
-    // println!("{:?}", Error::last_os_error().kind());
+  if ret != 0 {
+    match Error::last_os_error().raw_os_error() {
+      // > FROM `man gethostname`
+      // EFAULT name is an invalid address.
+      // EINVAL len is negative or, for sethostname(), len is larger than the maximum allowed size.
+      // ENAMETOOLONG
+      //        (glibc gethostname()) len is smaller than the actual size.  (Before version 2.1, glibc uses EINVAL  for
+      //        this case.)
+      // EPERM  For  sethostname(),  the caller did not have the CAP_SYS_ADMIN capability in the user namespace associ‐
+      // ated with its UTS namespace (see namespaces(7)).
 
-    // match Error::last_os_error().kind() {
-    //   // EPERM
-    //   ErrorKind::PermissionDenied => panic!(),
-
-    //   _ => {}
-    // };
-    Err("Something went wrong.")
+      Some(err) => match err {
+        // libc::EFAULT => Err(""),
+        // libc::ENAMETOOLONG => Err(""),
+        libc::EINVAL => Err("name too long"),
+        libc::EPERM => Err("you must be root to change the host name"),
+        _ => Err("Unknown error."),
+      },
+      None => Err("Unknown error."),
+    }
   }
   else {
     Ok(())
@@ -84,8 +118,11 @@ pub fn getnameinfo(sa: *const libc::sockaddr, salen: libc::socklen_t, flags: lib
   let ret = unsafe { libc::getnameinfo(sa, salen, host.as_mut_ptr() as *mut libc::c_char, host.len() as u32, std::ptr::null_mut(), 0, flags) };
 
   if ret != 0 {
-    //: TODO
-    Err("")
+    // > FROM `man getnameinfo`
+    // The  gai_strerror(3)  function translates these error codes to a human readable string, suitable for error re‐
+    // porting.
+    unsafe { libc::gai_strerror(ret); }
+    std::process::exit(1);
   }
   else {
     Ok(u8_to_string(host).unwrap())
