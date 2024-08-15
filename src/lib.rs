@@ -1,5 +1,9 @@
 use std::io::Error;
-use std::ffi::CString;
+use std::ffi::{CString, c_char};
+
+extern "C" {
+  fn hostname_alias(name: *const c_char);
+}
 
 fn u8_to_string(mut v: Vec<u8>) -> Option<String> {
   match v.iter().position(|&x| x == 0) {
@@ -127,4 +131,11 @@ pub fn getnameinfo(sa: *const libc::sockaddr, salen: libc::socklen_t, flags: lib
   else {
     Ok(u8_to_string(host).unwrap())
   }
+}
+
+pub fn dispnamealias() {
+  let name = CString::new("insorker").unwrap();
+  let name = name.as_bytes_with_nul();
+
+  unsafe { hostname_alias(name.as_ptr() as *const c_char) };
 }

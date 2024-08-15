@@ -1,6 +1,6 @@
 use clap::Parser;
 use std::{fs, net::Ipv6Addr, process, ptr, mem};
-use uthostname::{gethostname, getdomainname, sethostname, getnameinfo};
+use uthostname::{gethostname, getdomainname, sethostname, getnameinfo, dispnamealias};
 use dns_lookup::{AddrInfoHints, getaddrinfo};
 
 #[derive(Parser, Debug)]
@@ -108,7 +108,7 @@ fn run(args: Args) -> Result<(), &'static str> {
 
   } else if args.alias {
 
-    //: TODO
+    dispnamealias();
     Ok(())
 
   } else if args.all_fqdns || args.all_ip_address {
