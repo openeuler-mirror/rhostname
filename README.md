@@ -1,5 +1,13 @@
 # hostname
 
+## 逆天
+
+`hostname -i` 结尾没有空格
+
+`hostname -I` 结尾有空格
+
+如何评价
+
 ## 参数处理
 
 hostname 同时只能接收一个参数，多个参数优先处理最后一个，如

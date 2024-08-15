@@ -158,7 +158,7 @@ fn run(args: Args) -> Result<(), &'static str> {
 
         match getnameinfo((*ifa).ifa_addr, addrlen as u32, flags) {
           Ok(name) => print!("{name} "),
-          Err(e) => return Err(e)
+          Err(_) => continue
         }
       }
 
@@ -201,10 +201,7 @@ fn run(args: Args) -> Result<(), &'static str> {
     } else if args.fqdn {
       println!("{p}");
     } else if args.ip_address {
-      for ip in ip_address {
-        print!("{ip} ");
-      }
-      println!();
+      println!("{}", ip_address.join(" "));
     }
 
     Ok(())

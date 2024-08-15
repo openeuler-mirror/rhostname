@@ -125,8 +125,11 @@ pub fn getnameinfo(sa: *const libc::sockaddr, salen: libc::socklen_t, flags: lib
     // > FROM `man getnameinfo`
     // The  gai_strerror(3)  function translates these error codes to a human readable string, suitable for error re‐
     // porting.
-    unsafe { libc::gai_strerror(ret); }
-    std::process::exit(1);
+    if flags != libc::NI_NAMEREQD && ret != libc::EAI_NONAME {
+      unsafe { libc::gai_strerror(ret); }
+      std::process::exit(1);
+    }
+    Err("Unknown error.")
   }
   else {
     Ok(u8_to_string(host).unwrap())
@@ -134,7 +137,7 @@ pub fn getnameinfo(sa: *const libc::sockaddr, salen: libc::socklen_t, flags: lib
 }
 
 pub fn dispnamealias() {
-  let name = CString::new("insorker").unwrap();
+  let name = CString::new(gethostname().unwrap()).unwrap();
   let name = name.as_bytes_with_nul();
 
   unsafe { hostname_alias(name.as_ptr() as *const c_char) };
