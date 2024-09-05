@@ -1,6 +1,6 @@
 use clap::Parser;
 use std::{fs, net::Ipv6Addr, process, ptr, mem};
-use uthostname::{gethostname, getdomainname, sethostname, getnameinfo, dispnamealias};
+use rhostname::{gethostname, getdomainname, sethostname, getnameinfo, dispnamealias};
 use dns_lookup::{AddrInfoHints, getaddrinfo};
 
 #[derive(Parser, Debug)]

@@ -1,7 +1,7 @@
 use std::process::Command;
 
 fn test_sudo(args: Vec<&str>, name: &str) {
-  let args = [vec!["./target/debug/uthostname"], args.clone()].concat();
+  let args = [vec!["./target/debug/rhostname"], args.clone()].concat();
 
   Command::new("sudo")
     .args(args)
