@@ -25,7 +25,7 @@ pub fn gethostname() -> Result<String, &'static str> {
   let ret = unsafe { libc::gethostname(buf.as_mut_ptr() as *mut libc::c_char, buf.len()) };
 
   if ret != 0 {
-    Err("Unknown error.")
+    Err("gethostname failed, abort.")
   }
   else {
     // > FROM `man gethostname`
@@ -47,7 +47,7 @@ pub fn getdomainname() -> Result<String, &'static str> {
   let ret = unsafe { libc::getdomainname(buf.as_mut_ptr() as *mut libc::c_char, buf.len()) };
 
   if ret != 0 {
-    Err("Unknown error.")
+    Err("getdomainname failed, abort.")
   }
   else {
     // getdomainname() returns the null-terminated domain name in the character array name, which has a length of len
@@ -107,9 +107,9 @@ pub fn sethostname(name: String) -> Result<(), &'static str> {
         // libc::ENAMETOOLONG => Err(""),
         libc::EINVAL => Err("name too long"),
         libc::EPERM => Err("you must be root to change the host name"),
-        _ => Err("Unknown error."),
+        _ => Err("sethostname failed."),
       },
-      None => Err("Unknown error."),
+      None => Err("sethostname failed."),
     }
   }
   else {
@@ -129,7 +129,7 @@ pub fn getnameinfo(sa: *const libc::sockaddr, salen: libc::socklen_t, flags: lib
       unsafe { libc::gai_strerror(ret); }
       std::process::exit(1);
     }
-    Err("Unknown error.")
+    Err("getnameinfo failed.")
   }
   else {
     Ok(u8_to_string(host).unwrap())

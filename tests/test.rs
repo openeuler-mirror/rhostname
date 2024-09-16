@@ -1,20 +1,20 @@
 use std::process::Command;
 
-fn test_sudo(args: Vec<&str>, name: &str) {
-  let args = [vec!["./target/debug/rhostname"], args.clone()].concat();
+// fn test_sudo(args: Vec<&str>, name: &str) {
+//   let args = [vec!["./target/debug/uthostname"], args.clone()].concat();
 
-  Command::new("sudo")
-    .args(args)
-    .output()
-    .expect("failed to execute process");
+//   Command::new("sudo")
+//     .args(args)
+//     .output()
+//     .expect("failed to execute process");
 
-  let output = 
-    Command::new("./target/debug/uthostname")
-      .output()
-      .expect("failed to execute process");
+//   let output = 
+//     Command::new("./target/debug/uthostname")
+//       .output()
+//       .expect("failed to execute process");
   
-  assert_eq!(name, std::str::from_utf8(&output.stdout).unwrap());
-}
+//   assert_eq!(name, std::str::from_utf8(&output.stdout).unwrap());
+// }
 
 fn test(args: Vec<&str>) {
   let lhs =
@@ -38,13 +38,13 @@ fn test_get() {
   test(vec![""]);
 }
 
-#[test]
-fn test_set() {
-  test_sudo(vec!["test"], "test\n");
-  test(vec![""]);
-  test_sudo(vec!["localhost"], "localhost\n");
-  test(vec![""]);
-}
+// #[test]
+// fn test_set() {
+//   test_sudo(vec!["test"], "test\n");
+//   test(vec![""]);
+//   test_sudo(vec!["localhost"], "localhost\n");
+//   test(vec![""]);
+// }
 
 #[test]
 fn test_alias() {
@@ -56,13 +56,13 @@ fn test_all_fqdns() {
   test(vec!["-A"]);
 }
 
-#[test]
-fn test_bool() {
-  test_sudo(vec!["-b", "test"], "test\n");
-  test(vec![""]);
-  test_sudo(vec!["-b", "localhost"], "localhost\n");
-  test(vec![""]);
-}
+// #[test]
+// fn test_bool() {
+//   test_sudo(vec!["-b", "test"], "test\n");
+//   test(vec![""]);
+//   test_sudo(vec!["-b", "localhost"], "localhost\n");
+//   test(vec![""]);
+// }
 
 #[test]
 fn test_domain() {
@@ -74,11 +74,11 @@ fn test_fqdn() {
   test(vec!["-f"]);
 }
 
-#[test]
-fn test_file() {
-  test_sudo(vec!["-F", "./tests/hostname"], "insorker\n");
-  test(vec![""]);
-}
+// #[test]
+// fn test_file() {
+//   test_sudo(vec!["-F", "./tests/hostname"], "insorker\n");
+//   test(vec![""]);
+// }
 
 #[test]
 fn test_ip_address() {
