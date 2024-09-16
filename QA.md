@@ -1,12 +1,8 @@
 # hostname
 
-## 关于输出的末尾空格
+## 输出结果的末尾空格
 
-`hostname -i` 结尾没有空格
-
-`hostname -I` 结尾有空格
-
-如何评价
+`hostname -i` 结尾没有空格，`hostname -I` 结尾有空格。
 
 ## 参数处理
 
@@ -25,14 +21,13 @@ hostname -f -d <=> hostname -d
 
 前情提要，通过 hostname 设置 hostname 是临时设置，系统重启后会恢复原值。
 
-经过我的测试，hostname 设置成 localhost 或者 /etc/hostname 中的值后，再次更改 hostname 不会报错。否则，比如当前 hostname 是 a，尝试调用 hostname b 则会报错
+经过我的测试，hostname 设置成 localhost 或者 /etc/hostname 中的值后，再次更改 hostname 不会报错。否则，比如当前 hostname 是 a，尝试调用 hostname b 则会报错。
 
 ```sh
 sudo: unable to resolve host a: Temporary failure in name resolution
 ```
 
 错误原因参考 https://askubuntu.com/questions/1343609/sudo-unable-to-resolve-host-hostname-temporary-failure-in-name-resolution 和 https://blog.csdn.net/ichuzhen/article/details/8241847
-
 
 ## hostname -b 和 hostname -F ./empty_file 行为不一致
 
@@ -42,12 +37,14 @@ hostname -b 不接参数会输出 hostname，hostname -F ./empty_file 会报错�
 
 ## 错误类型
 
-rust 的错误类型和 linux 的错误类型不一样，参考 https://doc.rust-lang.org/std/io/enum.ErrorKind.html 和 https://internals.rust-lang.org/t/insufficient-std-io-error/3597
+rust 的错误类型和 linux 的错误类型不一样，参考 https://doc.rust-lang.org/std/io/enum.ErrorKind.html 和 https://internals.rust-lang.org/t/insufficient-std-io-error/3597。
 
 解决方法有两种
 
 1. 找到 rust 和 linux 对应的错误类型
 2. 通过 [RawOsError](https://doc.rust-lang.org/std/io/type.RawOsError.html#) 处理，即 [raw_os_error](https://doc.rust-lang.org/std/io/struct.Error.html#method.raw_os_error)，这个会返回具体错误类型的数字，libc 中有详细的错误类型，如 https://docs.rs/libc/latest/libc/constant.EINVAL.html
+
+这里采用第二种方式。
 
 ## 如何处理错误
 
@@ -61,16 +58,10 @@ rust 的错误类型和 linux 的错误类型不一样，参考 https://doc.rust
 
 这个是关于 -a 需要的函数，在 C 语言的 #include <netdb.h> 文件中。
 
-使用方法一是用 [rpgffi](https://docs.rs/rpgffi/latest/i686-apple-darwin/rpgffi/fn.gethostbyname.html)，二是[编译 C 语言使用](https://docs.rust-embedded.org/book/interoperability/c-with-rust.html)
+使用方法一是用 [rpgffi](https://docs.rs/rpgffi/latest/i686-apple-darwin/rpgffi/fn.gethostbyname.html)，二是[编译 C 语言使用](https://docs.rust-embedded.org/book/interoperability/c-with-rust.html)。这里采用第二种方式。
 
 # getdomainname
 
 ## domainname 的最大长度
 
-有的说 64，有的说 255
-
-# nix
-
-https://www.reddit.com/r/rust/comments/1bou5wz/windows_build_issue_could_not_find_sys_in_nix/
-
-我是用的是 WSL 作为开发环境，import nix 后 unresolved import `nix::ifaddr`。那么是不是编译出来的东西在有的平台上是不能用的。
+有的说 64，有的说 255。
