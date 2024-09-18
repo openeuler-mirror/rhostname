@@ -1,6 +1,6 @@
 use clap::Parser;
 use std::{fs, net::Ipv6Addr, process, ptr, mem};
-use uthostname::{gethostname, getdomainname, sethostname, getnameinfo, dispnamealias};
+use rhostname::{gethostname, getdomainname, sethostname, getnameinfo, dispnamealias};
 use dns_lookup::{AddrInfoHints, getaddrinfo};
 
 #[derive(Parser, Debug)]
@@ -121,7 +121,7 @@ fn run(args: Args) -> Result<(), &'static str> {
       let flags = if args.all_ip_address { NI_NUMERICHOST } else { NI_NAMEREQD };
 
       if libc::getifaddrs(&mut ifap) != 0 {
-        return Err("Unkown error.");
+        return Err("getifaddrs failed.");
       }
       
       loop {
@@ -181,7 +181,7 @@ fn run(args: Args) -> Result<(), &'static str> {
     let hostname = gethostname()?;
     let sockets = match getaddrinfo(Some(&hostname), None, Some(hints)) {
       Ok(sockets) => sockets.collect::<std::io::Result<Vec<_>>>().unwrap(),  
-      Err(_) => return Err("Unknown error.")
+      Err(_) => return Err("getaddrinfo failed.")
     };
 
     let mut ip_address: Vec<String> = Vec::new();
@@ -229,7 +229,6 @@ fn run(args: Args) -> Result<(), &'static str> {
 
     let domainname = getdomainname()?;
     println!("{domainname}");
-
     Ok(())
 
   }
@@ -237,7 +236,6 @@ fn run(args: Args) -> Result<(), &'static str> {
 
     let hostname = gethostname()?;
     println!("{hostname}");
-
     Ok(())
 
   }
@@ -249,5 +247,5 @@ fn main() {
   run(args).unwrap_or_else(|err| {
     eprintln!("hostname: {err}");
     process::exit(1);
-  })
+  });
 }
