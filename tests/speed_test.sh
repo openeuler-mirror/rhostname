@@ -37,7 +37,7 @@ for param in "${get_params[@]}"; do
   cmd1="${commands[0]} $param"
   cmd2="${commands[1]} $param"
 
-  hyperfine "$cmd1" "$cmd2" -N -w 3 --export-markdown temp.md
+  hyperfine  -N -w 10 "$cmd1" "$cmd2" --export-markdown temp.md
 
   cat temp.md >> $output_file
   echo "" >> $output_file
@@ -45,7 +45,6 @@ done
 
 if [ "$EUID" -ne 0 ]; then
   echo "请使用 sudo 权限运行剩余脚本"
-  exit 1
 else
   for param in "${set_params[@]}"; do
     hostname "localhost"
@@ -53,7 +52,7 @@ else
     cmd1="${commands[0]} $param hostname"
     cmd2="${commands[1]} $param hostname"
 
-    hyperfine "$cmd1" "$cmd2" -N -w 3 --export-markdown temp.md
+    hyperfine  -N -w 10 "$cmd1" "$cmd2" --export-markdown temp.md
 
     cat temp.md >> $output_file
     echo "" >> $output_file
