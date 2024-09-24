@@ -6,7 +6,9 @@ rhostname is a command-line tool used to display the system's DNS name, hostname
 
 ## Installation Guide
 
-TODO
+### Installing from an RPM package
+
+Use `rhostname.spec` to install, depending on the operating system.
 
 ### Compiling from Source
 

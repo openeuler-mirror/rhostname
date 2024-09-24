@@ -145,7 +145,7 @@ fn run(args: Args) -> Result<(), &'static str> {
           continue;
         }
 
-				let addrlen = if family == AF_INET as u16 { mem::size_of::<libc::sockaddr_in>() } else { mem::size_of::<libc::sockaddr_in6>() };
+        let addrlen = if family == AF_INET as u16 { mem::size_of::<libc::sockaddr_in>() } else { mem::size_of::<libc::sockaddr_in6>() };
 
         if family == AF_INET6 as u16 {
           let sa_in6 = (*ifa).ifa_addr as *const libc::sockaddr_in6;

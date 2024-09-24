@@ -34,7 +34,6 @@ done
 
 if [ "$EUID" -ne 0 ]; then
   echo "请使用 sudo 权限运行剩余脚本"
-  exit 1
 else
   echo "test set"
   for param in "${set_params[@]}"; do
