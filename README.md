@@ -6,10 +6,13 @@ rhostname 是一个用来显示系统的 DNS 名称、主机名 (hostname) 或 N
 
 ## 安装教程
 
-### 从 RPM 包安装
+### 使用 spec 文件构建 RPM 包安装
 
-1. 根据不同的操作系统使用 `rhostname.spec` 安装。
-2. 使用 `cargo-generate-rpm` 执行下列操作，最后 RPM 包会在 `target/generate-rpm/rhostname.rpm` 此处生成。
+使用 `rhostname.spec` 构建 RPM 包。
+
+### 使用 `cargo-generate-rpm` 构建 RPM 包安装
+
+使用 `cargo-generate-rpm` 执行下列操作，最后 RPM 包会在 `target/generate-rpm/rhostname.rpm` 处生成。
 
 ```shell
 cargo install cargo-generate-rpm
@@ -18,7 +21,7 @@ strip -s target/release/rhostname
 cargo generate-rpm
 ```
 
-### 从源码编译
+### 从源码编译安装
 
 1. 克隆项目
 
@@ -27,16 +30,10 @@ git clone https://gitee.com/insorker/rhostname
 cd rhostname
 ```
 
-2. 使用 cargo 编译项目
+2. 使用 cargo 安装项目
 
 ```bash
-cargo build --release
-```
-
-3. 安装二进制文件
-
-```bash
-sudo cp target/release/rhostname /usr/local/bin/
+cargo install --path .
 ```
 
 ## 使用说明

@@ -6,10 +6,13 @@ rhostname is a command-line tool used to display the system's DNS name, hostname
 
 ## Installation Guide
 
-### Installing from an RPM package
+### Install by Building RPM Package Using Spec File
 
-1. Use `rhostname.spec` to install, depending on the operating system.
-2. Execute the following commands using `cargo-generate-rpm`, and the RPM package will be generated at `target/generate-rpm/rhostname.rpm`.
+Use `rhostname.spec` to install.
+
+### Install by Building Using `cargo-generate-rpm`
+
+Execute the following commands using `cargo-generate-rpm`, and the RPM package will be generated at `target/generate-rpm/rhostname.rpm`.
 
 ```shell
 cargo install cargo-generate-rpm
@@ -18,25 +21,19 @@ strip -s target/release/rhostname
 cargo generate-rpm
 ```
 
-### Compiling from Source
+### Install from Source
 
-1. Clone the project repository:
+1. Clone the project repository
 
 ```bash
 git clone https://gitee.com/insorker/rhostname
 cd rhostname
 ```
 
-2. Compile the project using cargo:
+2. Install the project using cargo
 
 ```bash
 cargo build --release
-```
-
-3. Install the binary:
-
-```bash
-sudo cp target/release/rhostname /usr/local/bin/
 ```
 
 ## Usage Instructions
