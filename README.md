@@ -6,9 +6,17 @@ rhostname 是一个用来显示系统的 DNS 名称、主机名 (hostname) 或 N
 
 ## 安装教程
 
-### 从 rpm 包安装
+### 从 RPM 包安装
 
-根据不同的操作系统使用 `rhostname.spec` 安装。
+1. 根据不同的操作系统使用 `rhostname.spec` 安装。
+2. 使用 `cargo-generate-rpm` 执行下列操作，最后 RPM 包会在 `target/generate-rpm/rhostname.rpm` 此处生成。
+
+```shell
+cargo install cargo-generate-rpm
+cargo build --release
+strip -s target/release/rhostname
+cargo generate-rpm
+```
 
 ### 从源码编译
 

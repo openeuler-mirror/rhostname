@@ -7,8 +7,6 @@ License:        MulanPSL2
 URL:            https://gitee.com/openeuler/rhostname
 Source0:        %{name}-%{version}.tar.gz
 
-BuildRequires:  cargo
-
 %description
 The `rhostname` project reimplements the classic `hostname` tool in Rust. It is used to display the system's DNS name, and to display or set its hostname or NIS domain name.
 
