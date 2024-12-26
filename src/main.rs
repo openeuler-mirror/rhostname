@@ -84,27 +84,23 @@ struct Args {
 fn run(args: Args) -> Result<(), &'static str> {
   if let Some(hostname) = args.boot {
 
-    sethostname(hostname)
+    sethostname(&hostname)
 
   } else if let Some(path) = args.file {
 
     let contents =
       fs::read_to_string(path)
       .expect("No such file or directory.");
-    let mut hostname = "";
 
-    for line in contents.lines() {
-      if line != "" && !line.starts_with("#") {
-        hostname = line;
-        break;
-      }
-    }
+    let hostname = contents.lines()
+        .find(|line| *line != "" && !line.starts_with("#"))
+        .unwrap_or("");
 
-    sethostname(hostname.to_string())
+    sethostname(hostname)
 
   } else if let Some(hostname) = args.hostname {
 
-    sethostname(hostname)
+    sethostname(&hostname)
 
   } else if args.alias {
 
@@ -141,13 +137,17 @@ fn run(args: Args) -> Result<(), &'static str> {
         }
 
         let family = (*(*ifa).ifa_addr).sa_family;
-        if family != AF_INET as u16 && family != AF_INET6 as u16 {
+
+        #[cfg(target_os="linux")]
+        type AFType = u16;
+        #[cfg(target_os="macos")]
+        type AFType = u8;
+
+        if family != AF_INET as AFType && family != AF_INET6 as AFType {
           continue;
-        }
-
-        let addrlen = if family == AF_INET as u16 { mem::size_of::<libc::sockaddr_in>() } else { mem::size_of::<libc::sockaddr_in6>() };
-
-        if family == AF_INET6 as u16 {
+        }        
+        let addrlen = if family == AF_INET as AFType { mem::size_of::<libc::sockaddr_in>() } else { mem::size_of::<libc::sockaddr_in6>() };
+        if family == AF_INET6 as AFType {
           let sa_in6 = (*ifa).ifa_addr as *const libc::sockaddr_in6;
           let ipv6 = Ipv6Addr::from((*sa_in6).sin6_addr.s6_addr);
 
@@ -214,16 +214,9 @@ fn run(args: Args) -> Result<(), &'static str> {
       .split('.')
       .collect::<Vec<&str>>();
 
-    match hostname.get(0) {
-      Some(hostname) => {
-        println!("{hostname}");
-        Ok(())
-      },
-      None => {
-        println!("");
-        Ok(())
-      }
-    }
+    let hostname = hostname.get(0).unwrap_or(&"");
+    println!("{hostname}");
+    Ok(())
 
   } else if args.nis {
 
