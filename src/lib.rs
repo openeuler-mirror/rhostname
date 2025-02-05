@@ -44,7 +44,7 @@ pub fn getdomainname() -> Result<String, &'static str> {
   // In older kernels, it was 8 bytes.
 
   let mut buf = vec![0u8; 255];
-  let ret = unsafe { libc::getdomainname(buf.as_mut_ptr() as *mut libc::c_char, buf.len()) };
+  let ret = unsafe { libc::getdomainname(buf.as_mut_ptr() as *mut libc::c_char, buf.len().try_into().unwrap()) };
 
   if ret != 0 {
     Err("getdomainname failed, abort.")
@@ -60,7 +60,7 @@ pub fn getdomainname() -> Result<String, &'static str> {
   }
 }
 
-fn check_hostname(name: String) -> bool {
+fn check_hostname(name: &str) -> bool {
   let name = name.as_bytes();
 
   if name.len() == 0 || !name[0].is_ascii_alphanumeric() || !name[name.len() - 1].is_ascii_alphanumeric() {
@@ -82,14 +82,14 @@ fn check_hostname(name: String) -> bool {
   true
 }
 
-pub fn sethostname(name: String) -> Result<(), &'static str> {
-  if check_hostname(name.clone()) == false {
+pub fn sethostname(name: &str) -> Result<(), &'static str> {
+  if check_hostname(name) == false {
     return Err("the specified hostname is invalid")
   }
   
   let len = name.len();
   let name = CString::new(name).unwrap();
-  let ret = unsafe { libc::sethostname(name.as_ptr(), len)};
+  let ret = unsafe { libc::sethostname(name.as_ptr(), len.try_into().unwrap())};
 
   if ret != 0 {
     match Error::last_os_error().raw_os_error() {
@@ -141,4 +141,21 @@ pub fn dispnamealias() {
   let name = name.as_bytes_with_nul();
 
   unsafe { hostname_alias(name.as_ptr() as *const c_char) };
+}
+
+#[cfg(test)]
+mod test {
+  use super::*;
+
+  #[test]
+  fn test_check_hostname() {
+    assert!(check_hostname("ubuntu"));
+    assert!(!check_hostname("非ASCII字符"));
+    assert!(!check_hostname(".ubuntu"));
+    assert!(!check_hostname("-ubuntu"));
+    assert!(check_hostname("ubuntu-x86"));
+    assert!(!check_hostname("ubuntu.-x86"));
+    assert!(!check_hostname("ubuntu-.x86"));
+    assert!(!check_hostname("ubuntu..x86"));
+  }
 }
